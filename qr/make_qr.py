@@ -4,7 +4,8 @@
   survey-qr.png / .svg          설문으로 바로 가는 QR
   guide-qr.png / .svg           관람 안내 페이지로 가는 QR
   guide-qr-stencil.svg / .png   스텐실용. 오려 내도 판이 조각나지 않게 필요한 곳에 다리를 냈다
-그리고 guide.html 안의 설문 QR(넓은 화면에서만 보임)을 같은 주소로 다시 채운다.
+그리고 guide.html(넓은 화면에서만 보임)과 handout.html(A4 배포용) 안의 설문 QR을 같은 주소로 다시 채운다.
+A4 PDF는 이어서 node qr/make_handout.js 로 다시 만든다.
 
 주소가 바뀌면 BASE만 고치고 다시 실행한다.
 """
@@ -194,14 +195,18 @@ def stencil(q, name):
     return n, len(polys), bridges
 
 
-def inline_into_guide(q):
+def inline_into_pages(q):
     svg = q.svg_inline(scale=1, border=BORDER, dark=DARK, light=LIGHT, omitsize=True)
     svg = svg.replace('<svg ', '<svg role="img" aria-label="설문으로 가는 QR 코드" ', 1)
-    p = ROOT / 'guide.html'
+    for page in ('guide.html', 'handout.html'):
+        _fill(ROOT / page, svg)
+
+
+def _fill(p, svg):
     s = p.read_text(encoding='utf-8')
     s, k = re.subn(r'(<!-- QR:survey:start[^>]*-->).*?(<!-- QR:survey:end -->)',
                    lambda m: m.group(1) + '\n      ' + svg + '\n      ' + m.group(2), s, count=1, flags=re.S)
-    assert k == 1, 'guide.html에서 QR 자리를 찾지 못했습니다'
+    assert k == 1, f'{p.name}에서 QR 자리를 찾지 못했습니다'
     p.write_text(s, encoding='utf-8')
 
 
@@ -209,7 +214,7 @@ if __name__ == '__main__':
     survey = plain(SURVEY_URL, 'survey-qr', 'q')
     guide = plain(GUIDE_URL, 'guide-qr', 'm')
     n, holes, bridges = stencil(guide, 'guide-qr-stencil')
-    inline_into_guide(survey)
+    inline_into_pages(survey)
     cell = STENCIL_MM / (n + 2 * BORDER)
     print(f'survey {survey.designator}  {SURVEY_URL}')
     print(f'guide  {guide.designator}  {GUIDE_URL}')
