@@ -263,6 +263,7 @@ function resetSheets() { sheets.responses = new Sheet(); sheets.contacts = new S
     const text = await page.innerText('main');
     ok(!/마네킹|디지털|AI|인공지능|녹음|기록|축적|따라/.test(text), '안내문에 정체를 알려 주는 말이 없음');
     ok(!text.includes('움직이지 않는 몸'), '안내 페이지에 작품 해설 본문이 없음');
+    ok(!/흰 나무|흰 상자/.test(text), '상자를 흰색이라고 쓰지 않음');
     ok(await page.evaluate(() => document.documentElement.scrollWidth <= 360), '가로 스크롤 없음 (360px)');
     ok(!(await page.isVisible('.qr')), '휴대폰 폭에서는 QR 숨김');
     if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'guide-mobile.png'), fullPage: true });
