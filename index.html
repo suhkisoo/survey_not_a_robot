@@ -14,7 +14,7 @@ const CONFIG = {
   // Apps Script 웹 앱 배포 후 나오는 /exec 주소 (README 참고)
   ENDPOINT: 'https://script.google.com/macros/s/AKfycbws_NuP50CLsUwBAFqqRTbrLnY7k7BlBQl5XKYa6DySQa_6o0E4A0qnErko-aYqIONj/exec',
   // 문항을 고칠 때마다 올린다
-  FORM_VERSION: 'web-v1',
+  FORM_VERSION: 'web-v2',   // v2: 외시경 선택지를 문 쪽/측면 → 오른쪽/왼쪽으로 바꿈
 
   // [팀 확인 1] "직접 해 봄"의 구체적 행동 문구
   TRIED_LABEL_B: '직접 해 봄',
@@ -227,8 +227,8 @@ const STEPS = [
     qs: [
       expQ('a', 'A', '직접 해 봄', '말 걸기, 만지기, 노크 등'),
       { id: 'a_did', type: 'multi', label: 'A와 무엇을 해 보셨나요?', help: '모두 선택', exclusive: 'na', cond: a => seen(a, 'a'),
-        opts: [{ v: 'talk', t: 'A와 대화함' }, { v: 'hand', t: '손 구멍으로 손을 만짐' }, { v: 'peep_door', t: '문 쪽 외시경으로 봄' },
-          { v: 'peep_side', t: '측면 외시경으로 봄' }, { v: 'knock', t: '노크함' }, { v: 'na', t: '해당 없음' }] }
+        opts: [{ v: 'talk', t: 'A와 대화함' }, { v: 'hand', t: '손 구멍으로 손을 만짐' }, { v: 'peep_right', t: '오른쪽 외시경으로 봄' },
+          { v: 'peep_left', t: '왼쪽 외시경으로 봄' }, { v: 'knock', t: '노크함' }, { v: 'na', t: '해당 없음' }] }
     ].concat(scaleQs('a', 'A'), judgeQs('a', 'A'), [
       { id: 'a_reluct', type: 'scale7', label: 'A에게 함부로 말하거나 대하기가 꺼려졌다', cond: a => seen(a, 'a') },
       { id: 'a_quoted', type: 'single', label: 'A가 다른 관객의 말이나 이름을 꺼낸 적이 있나요?', cond: a => seen(a, 'a'),

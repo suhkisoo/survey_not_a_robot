@@ -108,7 +108,7 @@ function resetSheets() { sheets.responses = new Sheet(); sheets.contacts = new S
     await page.waitForSelector('#contactForm');
     const r = respRows();
     ok(r.length === 1 && r[0][COLS.indexOf('b_exp')] === 'none' && r[0][COLS.indexOf('age')] === '20s', '전송 정상 (1행)');
-    ok(r[0][COLS.indexOf('form_version')] === 'web-v1' && typeof r[0][COLS.indexOf('duration_sec')] === 'number', 'form_version, duration_sec 기록');
+    ok(r[0][COLS.indexOf('form_version')] === 'web-v2' && typeof r[0][COLS.indexOf('duration_sec')] === 'number', 'form_version, duration_sec 기록');
     ok(posts[0].type.startsWith('text/plain'), 'Content-Type text/plain');
     ok(await page.evaluate(() => localStorage.length) === 0, '전송 성공 후 임시 저장 삭제');
     await context.close(); }
