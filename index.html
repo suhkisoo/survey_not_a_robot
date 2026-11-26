@@ -22,7 +22,7 @@ const CONFIG = {
   // [팀 확인 2] "누군가처럼" 문항. 남길 것만 적는다: 'a_person', 'a_other'
   A_QUOTED_ITEMS: ['a_person', 'a_other'],
   // [팀 확인 3] 연구 주체와 소속. 비우면 "전시 〈로봇이 아닙니다*〉 팀"으로 표시
-  RESEARCHER: '',
+  RESEARCHER: '2026 Art & Technology Conference 참여 창작팀 ShellWe?',
   // [팀 확인 5] 경품 내용. 비우면 "소정의 경품"으로 표시
   PRIZE: '',
   // [팀 확인 6] 연락처 보유 기간
@@ -31,6 +31,11 @@ const CONFIG = {
   CROWD_NAME: '화면 속 군중',
   // [팀 확인 8] 디자인 톤 (색). 전시 도안 페이지와 같은 값
   THEME: { bg: '#E9EBEA', plaster: '#F7F7F5', ink: '#1D2321', sub: '#56605C', line: '#C9CECB', accent: '#1D2321', green: '#1F9A45', 'green-ink': '#14763A' },
+
+  // 전시 작품 페이지(2026atc.com/works/25)에서 가져온 문구. 비우면 표시하지 않는다
+  TAGLINE: '미지의 존재 앞에서, 우리가 지키려는 인간다움은 무엇일까?',
+  CREDIT: 'ShellWe? · 2026 Art & Technology Conference · 2026.11.26–29 서강대학교 하비에르관',
+  WORK_URL: 'https://2026atc.com/works/25',
 
   CONTACT_EMAIL: 'atscg2026@gmail.com',
   RETRY_DELAYS_MS: [2000, 5000, 10000],
@@ -97,6 +102,8 @@ button.ghost{background:transparent;color:var(--ink);flex:0 0 auto}
 button:disabled{opacity:.35;cursor:default}
 .hp{position:absolute!important;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
 hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+.tagline{font-size:18px;font-weight:700;letter-spacing:-.025em;line-height:1.4;margin:-6px 0 20px;padding-left:12px;border-left:6px solid var(--green)}
+.credit{margin:34px 0 0;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}
 .small{font-size:13.5px;color:var(--sub)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -371,6 +378,7 @@ function renderIntro(focus) {
   mount([
     progress(1, total),
     h('h1', null, '〈로봇이 아닙니다', h('sup', null, '*'), '〉', h('br'), '관람 설문'),
+    CONFIG.TAGLINE ? h('p', { class: 'tagline' }, CONFIG.TAGLINE) : null,
     h('p', null, '전시 〈로봇이 아닙니다*〉를 관람해 주셔서 감사합니다.'),
     h('p', null, '세 존재(4층 복도의 B, 5층 ' + CROWD + ', 5층 상자 속 A)를 만나며 어떤 생각이 드셨는지 묻는 짧은 설문입니다. 약 3분 걸립니다.'),
     h('p', null, '응답해 주신 분 가운데 추첨으로 ' + josa(prize, '을', '를') + ' 드립니다.'),
@@ -392,8 +400,15 @@ function renderIntro(focus) {
       if (state.consent === 'no') { clearDraft(); state = fresh(); state.phase = 'declined'; return render(true); }
       if (!state.startedAt) state.startedAt = Date.now();
       state.phase = 'survey'; warned = new Set(); save(); render(true);
-    } }, '시작하기'))
+    } }, '시작하기')),
+    credit()
   ], focus);
+}
+
+function credit(withLink) {
+  if (!CONFIG.CREDIT) return null;
+  return h('p', { class: 'credit' }, CONFIG.CREDIT,
+    withLink && CONFIG.WORK_URL ? [h('br'), h('a', { href: CONFIG.WORK_URL, target: '_blank', rel: 'noopener' }, '작품 소개 보기 ↗')] : null);
 }
 
 function renderDeclined() {
@@ -552,7 +567,8 @@ function renderDone() {
     h('h1', null, '응답이 제출되었습니다. 감사합니다.'),
     form,
     h('hr'),
-    h('div', { class: 'nav' }, h('button', { type: 'button', class: 'ghost', id: 'restart', onclick: () => { if (!busy) reset(); } }, '새 응답 시작'))
+    h('div', { class: 'nav' }, h('button', { type: 'button', class: 'ghost', id: 'restart', onclick: () => { if (!busy) reset(); } }, '새 응답 시작')),
+    credit(true)
   ], true);
 }
 
