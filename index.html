@@ -224,7 +224,7 @@ const STEPS = [
 const optsOf = (q, a) => typeof q.opts === 'function' ? q.opts(a) : q.opts;
 
 /* ---------- 상태와 임시 저장 ---------- */
-let state, warned, busy;
+let state, warned, busy, lastError = '';
 function fresh() {
   return { id: uuid(), startedAt: 0, savedAt: 0, phase: 'intro', stepId: 'b', consent: null, answers: {} };
 }
@@ -461,7 +461,7 @@ async function post(payload) {
     const res = await fetch(CONFIG.ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload), signal: ctrl.signal });
     const data = JSON.parse(await res.text());
-    if (!data || data.ok !== true) throw new Error('not_ok');
+    if (!data || data.ok !== true) throw new Error('server: ' + String(data && data.error || 'not_ok').slice(0, 120));
   } finally { clearTimeout(timer); }
 }
 async function sendWithRetry(payload, onRetry) {
@@ -469,6 +469,7 @@ async function sendWithRetry(payload, onRetry) {
   for (let i = 0; ; i++) {
     try { await post(payload); return true; }
     catch (e) {
+      lastError = e && e.message || String(e);
       if (i >= delays.length) return false;
       onRetry(i + 1, delays.length);
       await sleep(delays[i]);
@@ -498,7 +499,7 @@ async function submit() {
   setBusy(false, ['next', 'prev']);
   const btn = document.getElementById('next');
   if (btn) btn.textContent = '다시 보내기';
-  showMsg('err', '응답을 보내지 못했어요. 답안은 그대로 남아 있습니다.', '인터넷 연결을 확인한 뒤 \'다시 보내기\'를 눌러 주세요.');
+  showMsg('err', '응답을 보내지 못했어요. 답안은 그대로 남아 있습니다.', '인터넷 연결을 확인한 뒤 \'다시 보내기\'를 눌러 주세요.', '(오류 정보: ' + lastError + ')');
 }
 
 /* ---------- 완료 화면과 연락처 (명세 4.8) ---------- */
