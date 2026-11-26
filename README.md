@@ -3,6 +3,8 @@
 - `index.html` — 설문 페이지 (한 파일, 빌드 없음). 팀이 정할 값은 파일 맨 위 `CONFIG` 한 곳에 있다.
 - `apps-script/Code.gs` — 응답을 구글 스프레드시트에 쌓는 Apps Script 웹 앱.
 - `guide.html` — 관람 안내 페이지. QR로 들어와 관람 방법을 읽고, 끝에서 설문으로 넘어간다. 전시장 컴퓨터에 띄워 두면 넓은 화면에서는 설문 QR이 함께 보인다.
+- `handout.html` — A4 배포용 관람 안내(앞면 관람 안내, 뒷면 작품 노트). 인쇄는 `qr/handout-a4.pdf`. 문구를 고친 뒤 `node qr/make_handout.js`로 PDF를 다시 만든다.
+- `fonts/` — 인쇄용 글꼴(Pretendard, 마루 부리). 둘 다 OFL.
 - `qr/` — QR 코드와 그것을 만드는 `make_qr.py`. `guide-qr-stencil.svg`는 스텐실용(한 변 300mm 기준)이다.
 - `test/run.js` — 명세 9장 1~11번 자동 테스트. `node test/run.js` (Playwright 필요).
 

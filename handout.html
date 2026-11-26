@@ -6,95 +6,204 @@
 <meta name="robots" content="noindex">
 <title>〈로봇이 아닙니다*〉 관람 안내 (A4 배포용)</title>
 <!--
-  A4 한 장짜리 배포용 관람 안내. 인쇄할 때는 qr/handout-a4.pdf를 쓰면 된다.
-  문구를 고친 뒤 PDF를 다시 만들려면: node qr/make_handout.js
-  guide.html과 같은 규칙: 존재가 무엇인지 알려 주는 말은 쓰지 않는다.
+  A4 배포용 관람 안내. 앞면(관람 안내)과 뒷면(작품 노트) 두 쪽이다.
+  인쇄할 때는 qr/handout-a4.pdf를 쓴다. 문구를 고친 뒤에는  node qr/make_handout.js  로 PDF를 다시 만든다.
+
+  글의 출처
+  - 앞면: 웹 관람 안내(guide.html)와 같은 문구. 존재가 무엇인지 알려 주는 말은 쓰지 않는다.
+  - 운송장(보내는 곳 · 받는 곳 · 내용물)과 "사람? 0.51": 상자 제작 도안의 라벨 문구 그대로.
+  - 뒷면: 2026 ATC 프로젝트 지원서(한 줄 소개, 프로젝트 설명, 관객 경험)와 전시 사이트의 작품·팀 소개.
+    지원서 문장은 줄이기만 했고 새로 지어 쓰지 않았다.
 -->
 <style>
+@font-face{font-family:"Pretendard";font-weight:400;src:url(fonts/Pretendard-Regular.woff2) format("woff2")}
+@font-face{font-family:"Pretendard";font-weight:500;src:url(fonts/Pretendard-Medium.woff2) format("woff2")}
+@font-face{font-family:"Pretendard";font-weight:600;src:url(fonts/Pretendard-SemiBold.woff2) format("woff2")}
+@font-face{font-family:"Pretendard";font-weight:800;src:url(fonts/Pretendard-ExtraBold.woff2) format("woff2")}
+@font-face{font-family:"Pretendard";font-weight:900;src:url(fonts/Pretendard-Black.woff2) format("woff2")}
+@font-face{font-family:"MaruBuri";font-weight:400;src:url(fonts/MaruBuri-Regular.woff2) format("woff2")}
+@font-face{font-family:"MaruBuri";font-weight:600;src:url(fonts/MaruBuri-SemiBold.woff2) format("woff2")}
+@font-face{font-family:"MaruBuri";font-weight:700;src:url(fonts/MaruBuri-Bold.woff2) format("woff2")}
+
 @page{size:A4;margin:0}
-:root{--plaster:#F7F7F5;--ink:#1D2321;--sub:#56605C;--line:#C9CECB;--green:#1F9A45;--green-ink:#14763A}
-*{box-sizing:border-box}
-html,body{margin:0;background:#fff}
-body{color:var(--ink);font-family:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR","Malgun Gothic",system-ui,sans-serif;
-  font-size:11pt;line-height:1.55;word-break:keep-all;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.sheet{width:210mm;height:297mm;padding:15mm 16mm 13mm;display:flex;flex-direction:column;overflow:hidden;margin:0 auto}
-.eyebrow{margin:0 0 3mm;font-size:9pt;font-weight:600;color:var(--sub)}
-h1{margin:0 0 5mm;font-size:34pt;line-height:1.05;letter-spacing:-.045em;font-weight:800;color:var(--green-ink)}
-h1 sup{font-size:.5em;vertical-align:top;position:relative;top:.1em}
-.tagline{margin:0 0 4mm;padding-left:3mm;border-left:1.6mm solid var(--green);font-size:14pt;font-weight:700;letter-spacing:-.025em;line-height:1.35}
-.lead{margin:0 0 6mm;max-width:150mm}
-h2{margin:0 0 3mm;font-size:15pt;letter-spacing:-.035em;font-weight:800;line-height:1.2}
-.stops{list-style:none;margin:0;padding:0;counter-reset:stop;display:grid;grid-template-columns:1fr 1fr 1.25fr;flex:1}
-.stops>li{counter-increment:stop;background:var(--plaster);border:.5mm solid var(--ink);padding:5mm 4.5mm 2mm;min-width:0}
-.stops>li+li{margin-left:-.5mm}
-.top{display:flex;align-items:center;gap:2.5mm;margin-bottom:4mm}
-.top::before{content:counter(stop);flex:none;width:8mm;height:8mm;border-radius:50%;background:var(--green);color:#fff;font-weight:800;font-size:11pt;display:grid;place-items:center}
-.where{border:.4mm solid var(--ink);padding:.6mm 2mm;font-size:9pt;font-weight:700;line-height:1.4}
-h3{margin:0 0 1mm;font-size:22pt;line-height:1.1;letter-spacing:-.04em;font-weight:800}
-.what{margin:0 0 3.5mm;color:var(--sub);font-size:10pt}
-.do{list-style:none;margin:0;padding:0}
-.do li{position:relative;padding:2.6mm 0 2.6mm 5mm;border-top:.25mm solid var(--line)}
-.do li::before{content:"";position:absolute;left:.3mm;top:4.6mm;width:2.2mm;height:2.2mm;background:var(--green)}
-.do small{display:block;color:var(--sub);font-size:9pt}
-.cta{margin-top:6mm;border:.5mm solid var(--ink);display:grid;grid-template-columns:1fr auto;align-items:center;gap:8mm;padding:6mm 7mm}
-.cta p{margin:0 0 2mm}
-.cta .after{color:var(--sub);font-size:9.5pt}
-.steps{margin:3mm 0 0;padding:0;list-style:none;display:flex;gap:2mm;flex-wrap:wrap;font-size:9.5pt;font-weight:700}
-.steps li{border:.4mm solid var(--ink);padding:.8mm 2.4mm}
-.steps li+li::before{content:"→ ";font-weight:400}
-.qr{margin:0;text-align:center}
-.qr svg{display:block;width:42mm;height:42mm}
-.qr figcaption{margin-top:1mm;font-size:8.5pt;color:var(--sub)}
-.credit{margin:4mm 0 0;padding-top:2.5mm;border-top:.25mm solid var(--line);font-size:8pt;color:var(--sub);display:flex;justify-content:space-between;gap:4mm}
-@media screen{body{background:#E9EBEA}.sheet{background:#fff;margin:10px auto}}
+:root{
+  /* 글자와 선은 전부 먹 1도(K100)로 둔다. 회색 글자나 회색 실선은 인쇄하면 망점이 생겨 흐려지므로,
+     위계는 색이 아니라 크기와 굵기로 만든다. 색은 초록 하나만 쓴다. */
+  --ink:#000;
+  --text:#000;
+  --sub:#000;
+  --hair:#000;
+  --green:#14763A;      /* 상자 손 구멍 둘레의 초록 */
+  --green-l:#1F9A45;
+  --sans:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  --serif:"MaruBuri","Noto Serif KR",serif;
+  --m:13mm;             /* 바깥 여백 */
+  --rail:25mm;          /* 왼쪽 띠 */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#fff}
+body{color:var(--text);font-family:var(--sans);font-size:9.6pt;line-height:1.55;word-break:keep-all;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;font-kerning:normal;text-rendering:geometricPrecision}
+.page{position:relative;width:210mm;height:297mm;padding:var(--m);overflow:hidden;display:flex;flex-direction:column;break-after:page;margin:0 auto}
+.page:last-child{break-after:auto}
+
+/* 맨 위 띠 */
+.strip{display:flex;justify-content:space-between;align-items:baseline;gap:6mm;padding-bottom:2.2mm;border-bottom:.5mm solid var(--ink);
+  font-size:7.4pt;font-weight:600;letter-spacing:.04em;color:var(--ink)}
+.strip b{font-weight:800}
+
+/* ───────── 앞면 ───────── */
+.hero{display:grid;grid-template-columns:1fr 56mm;gap:8mm;align-items:end;margin-top:8.6mm}
+.detect{position:relative;border:.45mm solid var(--green-l);padding:5.2mm 6.5mm 4.8mm;justify-self:start}
+.detect .tag{position:absolute;left:-.45mm;bottom:100%;background:var(--green-l);color:#fff;font-size:8.4pt;font-weight:800;letter-spacing:.01em;line-height:1;padding:1.3mm 2.4mm 1.2mm;white-space:nowrap}
+.detect::before,.detect::after{content:"";position:absolute;width:3.2mm;height:3.2mm;border:.45mm solid var(--green-l)}
+.detect::before{right:-1.9mm;bottom:-1.9mm;border-left:0;border-top:0}
+.detect::after{right:-1.9mm;top:-1.9mm;border-left:0;border-bottom:0}
+h1{font-size:58pt;line-height:.96;letter-spacing:-.055em;font-weight:900;color:var(--ink);white-space:nowrap}
+h1 i{font-style:normal;color:var(--green);margin-left:.02em}
+.en{margin-top:3.4mm;font-size:8.4pt;font-weight:500;letter-spacing:.2em;color:var(--sub)}
+
+/* 운송장: 상자에 붙은 라벨 문구 그대로 */
+.waybill{border:.5mm solid var(--ink);font-size:8.4pt;line-height:1.3}
+.waybill .row{display:grid;grid-template-columns:15.5mm 1fr;border-top:.25mm solid var(--ink)}
+.waybill .row:first-child{border-top:0}
+.waybill dt{padding:2.3mm 0 2.1mm 2.4mm;font-size:6.9pt;font-weight:500;color:var(--sub);letter-spacing:.02em}
+.waybill dd{padding:2mm 2.4mm 2.1mm 0;font-weight:800;font-size:9.6pt;letter-spacing:-.015em;color:var(--ink)}
+.waybill .checks{display:flex;flex-wrap:wrap;gap:1.4mm 3.2mm;font-weight:800}
+.waybill .checks span{display:inline-flex;align-items:center;gap:1.4mm;white-space:nowrap}
+.waybill .checks span::before{content:"";width:3mm;height:3mm;border:.35mm solid var(--ink);flex:none}
+.waybill .checks .blank::after{content:"";width:13mm;border-bottom:.3mm solid var(--ink);align-self:flex-end;margin-bottom:.4mm}
+.waybill .no{display:flex;justify-content:space-between;align-items:center;border-top:.25mm solid var(--ink);padding:1.6mm 2.4mm;font-size:6.6pt;font-weight:500;letter-spacing:.08em;color:var(--sub)}
+
+.oneline{margin-top:6mm;font-family:var(--serif);font-weight:700;font-size:15.5pt;line-height:1.42;letter-spacing:-.02em;color:var(--ink)}
+.lead{margin-top:2.8mm;max-width:150mm;font-size:9.8pt;line-height:1.62;text-wrap:pretty}
+
+/* 만나는 순서 */
+.route{margin-top:6.4mm;border-top:.5mm solid var(--ink)}
+.cols,.stop{display:grid;grid-template-columns:22mm 36mm 45mm 1fr}
+.cols{padding:1.9mm 0 1.7mm;border-bottom:.25mm solid var(--ink);font-size:6.9pt;font-weight:800;letter-spacing:.12em;color:var(--ink)}
+.cols span:first-child{grid-column:1/3}
+.cols span+span{font-weight:500;color:var(--sub);letter-spacing:.06em}
+.stop{position:relative;padding:3.2mm 0 3.5mm;border-bottom:.25mm solid var(--ink);align-items:start}
+.stop:last-child{border-bottom:.5mm solid var(--ink)}
+.n{display:block;height:4.4mm;font-size:6.9pt;font-weight:800;letter-spacing:.14em;color:var(--green);line-height:1}
+.floor b{display:block;font-weight:900;font-size:22pt;line-height:.86;letter-spacing:-.05em;color:var(--ink)}
+.floor small{display:block;margin-top:1.9mm;font-size:6.9pt;font-weight:500;letter-spacing:.01em;line-height:1.3;color:var(--sub)}
+.who{padding-top:4.4mm}
+.who h3{font-weight:900;color:var(--ink);letter-spacing:-.05em;line-height:.86;font-size:33pt}
+.who h3.long{font-size:18.5pt;line-height:1.1;letter-spacing:-.045em;margin-top:-.9mm}
+.what{padding:4mm 6mm 0 0;font-size:8.8pt;font-weight:400;line-height:1.52;color:var(--sub)}
+.do{list-style:none;padding-top:2.5mm}
+.do li{position:relative;padding:1.4mm 0 1.4mm 5.2mm;border-top:.1mm solid var(--hair);font-size:9.8pt;font-weight:500;line-height:1.45}
+.do li:first-child{border-top:0}
+.do li::before{content:"";position:absolute;left:0;top:3.3mm;width:2mm;height:2mm;background:var(--green-l)}
+.do small{display:block;font-size:8.2pt;font-weight:400;color:var(--sub);line-height:1.45}
+.up{position:absolute;left:0;bottom:-1.25mm;background:#fff;padding-right:2mm;font-size:6.9pt;font-weight:800;letter-spacing:.04em;color:var(--green);line-height:1}
+
+/* 설문 */
+.survey{margin-top:auto;display:grid;grid-template-columns:1fr auto;gap:9mm;align-items:center;border:.5mm solid var(--ink);padding:4.4mm 5.5mm 4mm 6.5mm}
+.survey h2{font-size:15.5pt;font-weight:900;letter-spacing:-.04em;line-height:1.15;color:var(--ink)}
+.survey p{margin-top:2mm;font-size:9.4pt;line-height:1.58;max-width:104mm}
+.steps{list-style:none;display:flex;align-items:center;gap:1.6mm;margin-top:3.4mm;font-size:8pt;font-weight:800;color:var(--ink)}
+.steps li{border:.35mm solid var(--ink);padding:.9mm 2.4mm 1mm;line-height:1.2}
+.steps li.on{background:var(--ink);color:#fff}
+.steps i{font-style:normal;font-weight:400;color:var(--sub)}
+.qr{text-align:center}
+.qr svg{display:block;width:30mm;height:30mm}
+.qr figcaption{margin-top:.4mm;font-size:6.9pt;font-weight:500;color:var(--sub);letter-spacing:.01em}
+.foot{display:flex;justify-content:space-between;gap:6mm;margin-top:3.4mm;font-size:6.9pt;font-weight:400;color:var(--sub);letter-spacing:.02em}
+
+/* ───────── 뒷면 ───────── */
+.aster{position:absolute;right:10mm;top:26mm;font-family:var(--sans);font-weight:900;font-size:330pt;line-height:.74;color:var(--green);letter-spacing:0;height:62mm;overflow:hidden}
+.question{margin-top:4mm;max-width:124mm;font-family:var(--serif);font-weight:700;font-size:24.5pt;line-height:1.38;letter-spacing:-.035em;color:var(--ink)}
+.byline{margin-top:15mm;font-size:7.4pt;font-weight:800;letter-spacing:.14em;color:var(--green)}
+.notes{margin-top:12mm;border-top:.5mm solid var(--ink)}
+.note{display:grid;grid-template-columns:var(--rail) 1fr;padding:5.2mm 0 5.6mm;border-bottom:.25mm solid var(--ink)}
+.note:last-child{border-bottom:.5mm solid var(--ink)}
+.note h2{font-size:7.4pt;font-weight:800;letter-spacing:.14em;color:var(--ink);padding-top:.9mm;line-height:1.5}
+.note h2 small{display:block;font-size:6.8pt;font-weight:400;letter-spacing:.02em;color:var(--sub)}
+.body{max-width:136mm;font-family:var(--serif);font-size:10pt;line-height:1.8;letter-spacing:-.012em;text-wrap:pretty}
+.body p+p{margin-top:3.1mm}
+.pull{margin-top:4.4mm !important;padding-left:4mm;border-left:1.2mm solid var(--green-l);font-family:var(--serif);font-weight:600;font-size:12.4pt;line-height:1.6;letter-spacing:-.022em;color:var(--ink);max-width:126mm;text-wrap:balance}
+.team .body{font-size:9.4pt;line-height:1.74}
+.names{margin-top:3.4mm !important;display:flex;gap:6mm;font-family:var(--sans);font-size:9.6pt;font-weight:800;letter-spacing:-.01em;color:var(--ink)}
+.colophon{margin-top:auto;display:grid;grid-template-columns:var(--rail) 1fr 1fr 1fr;font-size:7.6pt;line-height:1.55;color:var(--text)}
+.colophon h2{font-size:7.4pt;font-weight:800;letter-spacing:.14em;color:var(--ink)}
+.colophon dt{font-size:6.6pt;font-weight:400;letter-spacing:.06em;color:var(--sub);margin-bottom:.4mm}
+.colophon dd{font-weight:600;padding-right:5mm}
+.back{margin-top:5mm;padding-top:2.4mm;border-top:.25mm solid var(--ink);font-size:7.2pt;font-weight:400;color:var(--sub);display:flex;justify-content:space-between;gap:6mm;letter-spacing:.02em}
+
+@media screen{body{background:#dfe2e0}.page{background:#fff;margin:10px auto;box-shadow:0 1px 8px rgba(0,0,0,.18)}}
 </style>
 </head>
 <body>
-<main class="sheet">
-  <p class="eyebrow">ShellWe? · 2026 Art &amp; Technology Conference</p>
-  <h1>〈로봇이 아닙니다<sup>*</sup>〉<br>관람 안내</h1>
-  <p class="tagline">미지의 존재 앞에서, 우리가 지키려는 인간다움은 무엇일까?</p>
+
+<!-- ══════════ 앞면 · 관람 안내 ══════════ -->
+<section class="page front">
+  <header class="strip">
+    <span>2026 Art &amp; Technology Conference 〈레시피 바꾸지 말 것 *〉</span>
+    <span><b>Work No. 25</b> · 5F Art Studio</span>
+  </header>
+
+  <div class="hero">
+    <div class="detect">
+      <span class="tag">사람? 0.51</span>
+      <h1>로봇이<br>아닙니다<i>*</i></h1>
+    </div>
+    <dl class="waybill" aria-label="운송장">
+      <div class="row"><dt>보내는 곳</dt><dd>ShellWe?</dd></div>
+      <div class="row"><dt>받는 곳</dt><dd>지금 이 앞에 선 사람</dd></div>
+      <div class="row"><dt>내용물</dt><dd><div class="checks"><span>인간</span><span>비인간</span><span class="blank"></span></div></dd></div>
+      <div class="no"><span>취급주의 · FRAGILE</span><span>A*</span></div>
+    </dl>
+  </div>
+
+  <p class="en">I’M NOT A ROBOT* &nbsp;—&nbsp; 관람 안내</p>
+  <p class="oneline">미지의 존재를 마주한 우리는, 또다시 인간과 비인간을 나눈다.</p>
   <p class="lead">이 전시에는 세 존재가 있습니다. 4층 복도에서 하나를, 5층에서 둘을 만납니다. 그들이 무엇인지는 알려 드리지 않습니다. 직접 만나 보고 판단해 주세요.</p>
 
-  <h2>만나는 순서</h2>
-  <ol class="stops">
-    <li>
-      <div class="top"><span class="where">4층 복도</span></div>
-      <h3>B</h3>
-      <p class="what">의자 위의 존재와 그 앞의 작은 화면.</p>
+  <div class="route">
+    <div class="cols"><span>만나는 순서</span><span>보이는 것</span><span>해 볼 것</span></div>
+
+    <article class="stop">
+      <div class="floor"><span class="n">01</span><b>4F</b><small>복도</small></div>
+      <div class="who"><h3>B</h3></div>
+      <p class="what">의자 위의 존재와<br>그 앞의 작은 화면.</p>
       <ul class="do">
         <li>가까이 다가가 바라보세요.</li>
         <li>앞에 놓인 작은 화면을 살펴보세요.</li>
       </ul>
-    </li>
-    <li>
-      <div class="top"><span class="where">5층 벽면 화면</span></div>
-      <h3>화면 속 군중</h3>
-      <p class="what">흰 안개 속의 얼굴 없는 군중.</p>
+      <span class="up">↑ 한 층 위, 5층으로</span>
+    </article>
+
+    <article class="stop">
+      <div class="floor"><span class="n">02</span><b>5F</b><small>벽면 화면</small></div>
+      <div class="who"><h3 class="long">화면 속<br>군중</h3></div>
+      <p class="what">흰 안개 속의<br>얼굴 없는 군중.</p>
       <ul class="do">
         <li>화면 앞에 서 보세요.</li>
         <li>천천히 움직여 보세요.</li>
       </ul>
-    </li>
-    <li>
-      <div class="top"><span class="where">5층 · A*가 찍힌 상자</span></div>
-      <h3>A</h3>
-      <p class="what">외시경과 손 구멍이 있는 상자 속의 존재.</p>
+    </article>
+
+    <article class="stop">
+      <div class="floor"><span class="n">03</span><b>5F</b><small>A*가 찍힌 상자</small></div>
+      <div class="who"><h3>A</h3></div>
+      <p class="what">외시경과 손 구멍이 있는<br>상자 속의 존재.</p>
       <ul class="do">
         <li>말을 걸어 보세요.<small>상자 옆 마이크에 대고 이야기하면 됩니다.</small></li>
         <li>문을 두드려 보세요.</li>
         <li>외시경으로 안을 들여다보세요.<small>상자의 한 면에 두 개가 있습니다. 둘 다 들여다보세요.</small></li>
         <li>손 구멍에 손을 넣어 보세요.</li>
       </ul>
-    </li>
-  </ol>
+    </article>
+  </div>
 
-  <section class="cta">
+  <section class="survey">
     <div>
       <h2>관람을 마치셨나요?</h2>
       <p>세 존재를 무엇이라고 생각하셨는지 들려주세요. 약 3분 걸리는 설문이고, 응답해 주신 분 가운데 추첨으로 경품을 드립니다.</p>
-      <p class="after">설문을 마치면 작품 해설이 이어집니다.</p>
-      <ol class="steps"><li>QR 찍기</li><li>3분 설문</li><li>작품 해설</li></ol>
+      <ol class="steps"><li class="on">QR 찍기</li><i>→</i><li>3분 설문</li><i>→</i><li>작품 해설</li></ol>
     </div>
     <figure class="qr">
       <!-- QR:survey:start (qr/make_qr.py가 채운다) -->
@@ -104,7 +213,55 @@ h3{margin:0 0 1mm;font-size:22pt;line-height:1.1;letter-spacing:-.04em;font-weig
     </figure>
   </section>
 
-  <p class="credit"><span>ShellWe? · 2026 Art &amp; Technology Conference</span><span>2026.11.26–29 서강대학교 하비에르관</span></p>
-</main>
+  <p class="foot"><span>ShellWe?</span><span>2026.11.26–29 서강대학교 하비에르관</span></p>
+</section>
+
+<!-- ══════════ 뒷면 · 작품 노트 ══════════ -->
+<section class="page backside">
+  <header class="strip">
+    <span>2026 Art &amp; Technology Conference 〈레시피 바꾸지 말 것 *〉</span>
+    <span><b>로봇이 아닙니다*</b> · ShellWe?</span>
+  </header>
+
+  <div class="aster" aria-hidden="true">*</div>
+
+  <p class="byline">작품 노트</p>
+  <p class="question">미지의 존재 앞에서,<br>우리가 지키려는 인간다움은<br>무엇일까?</p>
+
+  <div class="notes">
+    <section class="note">
+      <h2>작품<small>로봇이 아닙니다*</small></h2>
+      <div class="body">
+        <p>인간은 오래전부터 자신을 비인간과 구분해 왔습니다. 한때는 이성을 인간만의 우월한 능력으로 내세웠지만, 인간의 이성을 닮고 때로는 넘어서는 AI가 등장하자 인간다움의 기준은 감정으로 옮겨갔습니다. 이처럼 인간과 비인간을 가르는 기준은 시대와 상황에 따라 달라집니다.</p>
+        <p>〈로봇이 아닙니다*〉에 등장하는 존재들은 근본적으로 인간의 기준으로 정의되지 않은 ‘미지의 존재’입니다. 작품은 미지의 존재를 마주한 우리가 그것을 이해하기도 전에 인간과 비인간으로 구분하려는 순간에 주목하며, 그 익숙한 행위가 어디에서 비롯되는지 돌아보게 합니다.</p>
+      </div>
+    </section>
+
+    <section class="note">
+      <h2>감각<small>보고, 듣고, 만지고</small></h2>
+      <div class="body">
+        <p>관객은 A가 있는 공간을 직접 들여다보고, 그 안에서 들려오는 소리에 귀를 기울이며, 구멍 안으로 손을 넣어 존재를 만져보게 됩니다. 눈으로 확인하는 것만으로는 알 수 없었던 존재를 시각과 청각, 촉각을 차례로 사용하며 조금씩 알아가는 것입니다. 하지만 이러한 감각을 모두 경험하더라도 A의 정체는 완전히 드러나지 않습니다.</p>
+        <p class="pull">자신이 A를 어느 정도 이해했다고 느끼는 순간, 실제로 확인한 것과 스스로 추측한 것이 무엇이었는지 돌아보기를 바랍니다.</p>
+      </div>
+    </section>
+
+    <section class="note team">
+      <h2>팀<small>ShellWe?</small></h2>
+      <div class="body">
+        <p>ShellWe?는 ‘껍데기’를 뜻하는 Shell과 ‘우리’를 뜻하는 We에서 출발한 창작팀입니다. 인간과 기술의 관계를 주제로, 관객의 말과 움직임이 작품의 일부가 되는 인터랙티브 아트를 제작합니다. 몸과 외형으로 타자를 구분하는 태도에 질문을 던지고, 관객이 낯선 존재와 관계 맺는 경험을 만듭니다. “함께할까요?”라는 Shall we?처럼, 서로 다른 존재가 ‘우리’가 될 가능성을 탐구합니다.</p>
+        <p class="names"><span>김민서</span><span>박종호</span><span>김휘경</span><span>서기수</span></p>
+      </div>
+    </section>
+  </div>
+
+  <dl class="colophon">
+    <h2>전시</h2>
+    <div><dt>EXHIBITION</dt><dd>2026 Art &amp; Technology Conference<br>〈레시피 바꾸지 말 것 *〉</dd></div>
+    <div><dt>DATE · PLACE</dt><dd>2026.11.26–29<br>서강대학교 하비에르관</dd></div>
+    <div><dt>WORK</dt><dd>No. 25 · 인터랙티브 아트<br>4층 복도, 5층 Art Studio</dd></div>
+  </dl>
+  <p class="back"><span>관람을 마친 뒤 앞면의 QR로 3분 설문에 참여해 주세요. 설문을 마치면 작품 해설이 이어집니다.</span><span>2026atc.com/works/25</span></p>
+</section>
+
 </body>
 </html>
