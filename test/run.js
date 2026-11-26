@@ -43,7 +43,7 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
-  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').replace("ENDPOINT: ''", "ENDPOINT: '/exec'");
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').replace(/ENDPOINT: '[^']*'/, "ENDPOINT: '/exec'");
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end(html);
 });
 
