@@ -2,6 +2,8 @@
 
 - `index.html` — 설문 페이지 (한 파일, 빌드 없음). 팀이 정할 값은 파일 맨 위 `CONFIG` 한 곳에 있다.
 - `apps-script/Code.gs` — 응답을 구글 스프레드시트에 쌓는 Apps Script 웹 앱.
+- `guide.html` — 관람 안내 페이지. QR로 들어와 관람 방법을 읽고, 끝에서 설문으로 넘어간다. 전시장 컴퓨터에 띄워 두면 넓은 화면에서는 설문 QR이 함께 보인다.
+- `qr/` — QR 코드와 그것을 만드는 `make_qr.py`. `guide-qr-stencil.svg`는 스텐실용(한 변 300mm 기준)이다.
 - `test/run.js` — 명세 9장 1~11번 자동 테스트. `node test/run.js` (Playwright 필요).
 
 ## 설정 순서
@@ -19,3 +21,11 @@
 ## 문항을 고칠 때
 
 `CONFIG.FORM_VERSION`을 올린다(`web-v2` …). 열이 늘면 `Code.gs`의 `RESP_COLS`와 시트 머리글도 같이 고친다.
+
+## 관람 안내와 작품 해설
+
+- 주소: 설문은 `…/survey_not_a_robot/`, 관람 안내는 `…/survey_not_a_robot/guide.html`.
+- 관람 안내에는 존재가 무엇인지 알려 주는 말(예: "마네킹", "디지털")을 쓰지 않는다. 설문의 판단 문항에 답을 미리 주기 때문이다. 테스트가 이것을 검사한다.
+- 작품 해설 본문은 설문을 제출하거나 참여를 거절한 뒤에만 나온다. 문구는 `index.html`의 `CONFIG.COMMENTARY`.
+- 주소가 바뀌면 `qr/make_qr.py`의 `BASE`를 고치고 다시 실행한다(`pip install segno pillow shapely`).
+- 스텐실은 오려 낸 뒤에도 판이 한 장으로 남도록 다리를 냈다. 칠한 뒤 모서리 큰 네모 세 개에 남는 가는 틈(12곳)을 펜으로 메우면 일반 QR과 같아진다.

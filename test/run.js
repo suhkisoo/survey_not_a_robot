@@ -43,7 +43,8 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
-  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').replace(/ENDPOINT: '[^']*'/, "ENDPOINT: '/exec'");
+  const file = req.url.split(/[?#]/)[0] === '/guide.html' ? 'guide.html' : 'index.html';
+  const html = fs.readFileSync(path.join(ROOT, file), 'utf8').replace(/ENDPOINT: '[^']*'/, "ENDPOINT: '/exec'");
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end(html);
 });
 
@@ -62,7 +63,7 @@ function resetSheets() { sheets.responses = new Sheet(); sheets.contacts = new S
   const SHOTS = process.env.SHOTS;
 
   async function open() {
-    const context = await browser.newContext({ viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true });
+    const context = await browser.newContext({ viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true, deviceScaleFactor: SHOTS ? 2 : 1 });
     const page = await context.newPage();
     page.on('dialog', d => { fail++; console.log('  ✗ alert/confirm이 떴음: ' + d.message()); d.dismiss(); });
     page.on('pageerror', e => { fail++; console.log('  ✗ 페이지 오류: ' + e.message); });
@@ -250,6 +251,62 @@ function resetSheets() { sheets.responses = new Sheet(); sheets.contacts = new S
     const order = sheets.contacts.rows.slice(1).map(r => r[1]).filter(x => /^p\d$/.test(x)).join('');
     ok(sheets.contacts.rows.length === 10 && order !== 'p0p1p2p3p4p5p6p7', '행 위치 무작위 (' + order + ')');
     ok(sheets.contacts.rows[0].join() === 'date,contact,raffle,interview', '머리글 행 유지'); }
+
+  // 관람 안내 페이지와 작품 해설 (명세 이후 추가)
+  console.log('14. 관람 안내 페이지 / 작품 해설');
+  { resetSheets(); const { context, page } = await open();
+    ok(await page.locator('#commentary').count() === 0, '설문 전에는 작품 해설이 없음');
+    ok(await page.getAttribute('#guideLink', 'href') === 'guide.html', '설문 인트로에 관람 안내 링크');
+    await page.goto(url + 'guide.html');
+    ok((await page.textContent('h1')).includes('관람 안내'), '안내 페이지 열림');
+    ok(await page.locator('.stops > li').count() === 3, '세 존재 안내');
+    const text = await page.innerText('main');
+    ok(!/마네킹|디지털|AI|인공지능|녹음|기록|축적|따라/.test(text), '안내문에 정체를 알려 주는 말이 없음');
+    ok(!text.includes('움직이지 않는 몸'), '안내 페이지에 작품 해설 본문이 없음');
+    ok(await page.evaluate(() => document.documentElement.scrollWidth <= 360), '가로 스크롤 없음 (360px)');
+    ok(!(await page.isVisible('.qr')), '휴대폰 폭에서는 QR 숨김');
+    if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'guide-mobile.png'), fullPage: true });
+    await page.click('#toSurvey');
+    await page.waitForSelector('input[name="consent"]');
+    ok((await title(page)).includes('관람 설문') && posts.length === 0, '"설문 참여하기" → 설문 인트로');
+    await start(page); await pick(page, 'b_exp', 'seen');
+    await page.goto(url + 'guide.html');
+    ok(await page.textContent('#toSurvey') === '설문 이어서 하기', '작성 중인 설문이 있으면 "설문 이어서 하기"');
+    await page.click('#toSurvey');
+    await page.waitForSelector('input[name="b_exp"]');
+    ok(await page.isChecked('input[name="b_exp"][value="seen"]'), '이어서 하면 답이 남아 있음');
+    await nextTwice(page);
+    await pick(page, 'c_exp', 'none'); await next(page);
+    await pick(page, 'a_exp', 'none'); await next(page);
+    ok(await page.locator('#commentary').count() === 0, '설문 도중에도 작품 해설이 없음');
+    await nextTwice(page);
+    await submitInfo(page);
+    await page.waitForSelector('#contactForm');
+    ok(respRows().length === 1, '안내를 거쳐도 제출 정상');
+    ok(await page.locator('#commentary').count() === 1 && !(await page.isVisible('#commentary .cm-body')), '제출 뒤 작품 해설이 접힌 채로 나타남');
+    await page.click('#commentary summary');
+    ok((await page.innerText('#commentary')).includes('인간다움은 무엇이며'), '펼치면 해설 본문');
+    ok(await page.isVisible('#contactForm') && await page.evaluate(() => document.documentElement.scrollWidth <= 360), '연락처 칸 유지, 가로 스크롤 없음');
+    if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'done-commentary.png'), fullPage: true });
+    await context.close();
+
+    const o = await open();
+    await pick(o.page, 'consent', 'no'); await next(o.page);
+    ok(await o.page.locator('#commentary').count() === 1, '참여하지 않은 사람도 작품 해설을 볼 수 있음');
+    await o.context.close();
+
+    const wide = await browser.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: SHOTS ? 2 : 1 });
+    const wp = await wide.newPage();
+    await wp.goto(url + 'guide.html');
+    const tops = await wp.$$eval('.stops > li', els => els.map(e => Math.round(e.getBoundingClientRect().top)));
+    ok(new Set(tops).size === 1, '넓은 화면에서는 세 존재가 한 줄');
+    ok(await wp.isVisible('.qr svg path'), '넓은 화면에서는 설문 QR 표시');
+    ok(await wp.evaluate(() => document.documentElement.scrollWidth <= 1280), '가로 스크롤 없음 (1280px)');
+    if (SHOTS) {
+      await wp.screenshot({ path: path.join(SHOTS, 'guide-desktop.png'), fullPage: true });
+      await wp.locator('.qr svg').screenshot({ path: path.join(SHOTS, 'guide-inline-qr.png') });
+    }
+    await wide.close(); }
 
   // honeypot
   console.log('+ honeypot');

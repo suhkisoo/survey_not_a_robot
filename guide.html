@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#E9EBEA">
+<title>〈로봇이 아닙니다*〉 관람 안내</title>
+<!--
+  관람 안내 페이지. QR로 들어와 관람 방법을 읽고, 끝에서 설문(index.html)으로 넘어간다.
+  전시장 컴퓨터에 띄워 둘 수도 있다(넓은 화면에서는 설문 QR이 함께 보인다).
+
+  문구를 고칠 때 지킬 것:
+  설문의 판단 문항("무엇이라고 생각하시나요?")에 답을 미리 주지 않는다.
+  존재가 무엇인지(사람·AI·사물·기계)를 알려 주는 말, 예를 들어 "마네킹", "디지털"은 쓰지 않는다.
+  작품 해설 본문은 설문을 제출한 뒤 완료 화면에서 보여 준다(index.html의 CONFIG.COMMENTARY).
+-->
+<style>
+:root{--bg:#E9EBEA;--plaster:#F7F7F5;--ink:#1D2321;--sub:#56605C;--line:#C9CECB;--green:#1F9A45;--green-ink:#14763A}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  font-size:16px;line-height:1.62;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px calc(48px + env(safe-area-inset-bottom))}
+a{color:inherit}
+a:focus-visible{outline:3px solid #FFD34D;outline-offset:2px}
+.eyebrow{margin:0 0 12px;font-size:13px;font-weight:600;color:var(--sub)}
+h1{margin:0 0 20px;font-size:clamp(34px,9.4vw,68px);line-height:1.04;letter-spacing:-.045em;font-weight:800;color:var(--green-ink)}
+h1 sup{font-size:.5em;vertical-align:top;position:relative;top:.1em}
+.tagline{margin:0 0 20px;padding-left:12px;border-left:6px solid var(--green);font-size:clamp(18px,2.3vw,26px);font-weight:700;letter-spacing:-.025em;line-height:1.4}
+.lead{margin:0 0 22px;max-width:34em;font-size:clamp(16px,1.6vw,19px)}
+.jump{display:inline-flex;align-items:center;min-height:46px;padding:0 16px;border:1.5px solid var(--ink);font-weight:700;font-size:15px;text-decoration:none}
+h2{margin:44px 0 14px;font-size:clamp(22px,2.6vw,30px);letter-spacing:-.035em;font-weight:800;line-height:1.2}
+
+.stops{list-style:none;margin:0;padding:0;counter-reset:stop;display:grid}
+.stops>li{counter-increment:stop;background:var(--plaster);border:1.5px solid var(--ink);padding:18px 18px 8px;min-width:0}
+.stops>li+li{margin-top:-1.5px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.top::before{content:counter(stop);flex:none;width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff;font-weight:800;font-size:16px;display:grid;place-items:center}
+.where{border:1.5px solid var(--ink);padding:4px 10px;font-size:14px;font-weight:700;line-height:1.4}
+h3{margin:0 0 4px;font-size:clamp(30px,3.6vw,42px);line-height:1.1;letter-spacing:-.04em;font-weight:800}
+.what{margin:0 0 14px;color:var(--sub)}
+.do{list-style:none;margin:0;padding:0}
+.do li{position:relative;padding:11px 0 11px 22px;border-top:1px solid var(--line)}
+.do li::before{content:"";position:absolute;left:1px;top:19px;width:9px;height:9px;background:var(--green)}
+.do small{display:block;color:var(--sub);font-size:14px}
+
+.cta{margin-top:44px;background:var(--ink);color:#fff;padding:24px 20px 26px;display:grid;gap:22px}
+.cta h2{margin:0 0 10px;color:#fff}
+.cta p{margin:0 0 10px;max-width:30em}
+.cta .after{color:var(--line);font-size:14.5px}
+.btn{display:flex;align-items:center;justify-content:center;min-height:56px;margin-top:18px;padding:0 22px;background:#fff;color:var(--ink);font-weight:800;font-size:18px;letter-spacing:-.02em;text-decoration:none}
+.qr{display:none}
+.credit{margin:30px 0 0;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}
+
+@media (min-width:860px){
+  .wrap{padding:44px 40px 64px}
+  .stops{grid-template-columns:repeat(3,1fr)}
+  .stops>li{padding:24px 24px 12px}
+  .stops>li+li{margin-top:0;margin-left:-1.5px}
+  .cta{grid-template-columns:1fr auto;align-items:center;gap:40px;padding:36px 40px}
+  .btn{display:inline-flex;min-width:260px}
+  .qr{display:block;margin:0;text-align:center}
+  .qr svg{display:block;width:200px;height:200px;background:#fff}
+  .qr figcaption{margin-top:8px;font-size:13.5px;color:var(--line);max-width:200px}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <p class="eyebrow">ShellWe? · 2026 Art &amp; Technology Conference</p>
+    <h1>〈로봇이 아닙니다<sup>*</sup>〉<br>관람 안내</h1>
+    <p class="tagline">미지의 존재 앞에서, 우리가 지키려는 인간다움은 무엇일까?</p>
+    <p class="lead">이 전시에는 세 존재가 있습니다. 4층 복도에서 하나를, 5층에서 둘을 만납니다. 그들이 무엇인지는 알려 드리지 않습니다. 직접 만나 보고 판단해 주세요.</p>
+    <a class="jump" href="#survey">관람을 마치셨다면 설문으로 ↓</a>
+  </header>
+
+  <section aria-labelledby="h-route">
+    <h2 id="h-route">만나는 순서</h2>
+    <ol class="stops">
+      <li>
+        <div class="top"><span class="where">4층 복도</span></div>
+        <h3>B</h3>
+        <p class="what">의자 위의 존재와 그 앞의 작은 화면.</p>
+        <!-- [팀 확인] B 앞에서 관객이 할 수 있는 행동을 실제에 맞게 고친다 -->
+        <ul class="do">
+          <li>가까이 다가가 바라보세요.</li>
+          <li>앞에 놓인 작은 화면을 살펴보세요.</li>
+        </ul>
+      </li>
+      <li>
+        <div class="top"><span class="where">5층 벽면 화면</span></div>
+        <h3>화면 속 군중</h3>
+        <p class="what">흰 안개 속의 얼굴 없는 군중.</p>
+        <!-- [팀 확인] 군중 앞에서 관객이 할 수 있는 행동을 실제에 맞게 고친다 -->
+        <ul class="do">
+          <li>화면 앞에 서 보세요.</li>
+          <li>천천히 움직여 보세요.</li>
+        </ul>
+      </li>
+      <li>
+        <div class="top"><span class="where">5층 흰 나무 상자</span></div>
+        <h3>A</h3>
+        <p class="what">외시경과 손 구멍이 있는 상자 속의 존재.</p>
+        <!-- [팀 확인] 마이크 위치와 외시경 위치가 실제 설치와 맞는지 확인한다 -->
+        <ul class="do">
+          <li>말을 걸어 보세요.<small>상자 옆 마이크에 대고 이야기하면 됩니다.</small></li>
+          <li>문을 두드려 보세요.</li>
+          <li>외시경으로 안을 들여다보세요.<small>문과 옆면에 있습니다.</small></li>
+          <li>손 구멍에 손을 넣어 보세요.</li>
+        </ul>
+      </li>
+    </ol>
+  </section>
+
+  <section class="cta" id="survey" aria-labelledby="h-survey">
+    <div>
+      <h2 id="h-survey">관람을 마치셨나요?</h2>
+      <p>세 존재를 무엇이라고 생각하셨는지 들려주세요. 약 3분 걸리는 설문이고, 응답해 주신 분 가운데 추첨으로 경품을 드립니다.</p>
+      <p class="after">설문을 마치면 작품 해설이 이어집니다.</p>
+      <a class="btn" id="toSurvey" href="./">설문 참여하기</a>
+    </div>
+    <figure class="qr">
+      <!-- QR:survey:start (qr/make_qr.py가 채운다) -->
+      <svg role="img" aria-label="설문으로 가는 QR 코드" viewBox="0 0 41 41" class="segno"><path fill="#fff" d="M0 0h41v41h-41z"/><path class="qrline" stroke="#1d2321" d="M4 4.5h7m2 0h2m3 0h1m1 0h1m5 0h2m2 0h7m-33 1h1m5 0h1m2 0h2m8 0h2m1 0h1m3 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m1 0h3m3 0h1m3 0h3m2 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m4 0h2m1 0h1m1 0h1m2 0h3m2 0h1m1 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h3m2 0h1m3 0h2m2 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m1 0h1m1 0h1m1 0h1m1 0h3m2 0h1m1 0h1m4 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-23 1h1m2 0h1m2 0h6m2 0h1m-24 1h1m2 0h1m1 0h1m1 0h1m2 0h1m1 0h2m1 0h2m2 0h6m1 0h2m1 0h1m-31 1h1m2 0h2m2 0h1m1 0h1m1 0h1m3 0h1m1 0h2m2 0h1m1 0h1m1 0h1m3 0h3m-32 1h4m2 0h1m2 0h1m8 0h1m4 0h3m3 0h1m1 0h1m-32 1h2m2 0h2m3 0h1m1 0h3m1 0h4m1 0h2m4 0h1m4 0h1m-31 1h1m1 0h1m1 0h3m2 0h1m3 0h1m1 0h1m1 0h7m1 0h4m1 0h1m-32 1h2m1 0h1m1 0h1m3 0h1m3 0h1m2 0h3m2 0h1m1 0h1m1 0h1m1 0h1m1 0h1m-30 1h2m2 0h1m1 0h1m3 0h2m1 0h2m2 0h1m5 0h1m1 0h3m2 0h2m-28 1h1m2 0h1m3 0h6m2 0h1m1 0h1m2 0h6m-30 1h1m1 0h1m3 0h1m3 0h2m1 0h4m2 0h1m1 0h4m1 0h1m1 0h1m2 0h1m-31 1h1m2 0h2m3 0h2m2 0h3m1 0h2m4 0h1m5 0h3m-32 1h1m2 0h5m4 0h1m3 0h2m2 0h4m1 0h1m1 0h1m1 0h1m1 0h1m-32 1h1m1 0h1m1 0h2m1 0h2m1 0h1m1 0h2m3 0h2m2 0h1m1 0h1m1 0h1m1 0h1m4 0h1m-33 1h1m2 0h2m1 0h1m8 0h2m3 0h1m1 0h3m1 0h4m-30 1h5m2 0h4m3 0h1m6 0h3m3 0h1m1 0h1m1 0h1m-30 1h1m1 0h3m2 0h1m2 0h1m4 0h1m2 0h1m2 0h2m3 0h1m1 0h2m-29 1h2m4 0h2m4 0h1m1 0h5m2 0h3m1 0h1m3 0h1m-33 1h7m2 0h1m3 0h1m1 0h4m1 0h2m1 0h7m-22 1h2m1 0h1m2 0h1m1 0h1m1 0h1m2 0h1m2 0h1m3 0h1m1 0h2m-32 1h7m2 0h5m1 0h1m1 0h1m2 0h1m3 0h1m1 0h1m1 0h2m-30 1h1m5 0h1m2 0h2m2 0h1m2 0h6m2 0h1m3 0h1m3 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m2 0h1m2 0h4m1 0h6m1 0h2m-33 1h1m1 0h3m1 0h1m2 0h2m2 0h2m3 0h1m2 0h4m1 0h3m1 0h2m-32 1h1m1 0h3m1 0h1m3 0h2m3 0h3m7 0h4m1 0h1m-31 1h1m5 0h1m1 0h1m1 0h1m3 0h1m2 0h1m1 0h1m1 0h2m3 0h1m-27 1h7m3 0h3m1 0h2m1 0h8m1 0h1m2 0h1m2 0h1"/></svg>
+      <!-- QR:survey:end -->
+      <figcaption>휴대폰 카메라로 찍으면 설문이 열립니다</figcaption>
+    </figure>
+  </section>
+
+  <p class="credit">ShellWe? · 2026 Art &amp; Technology Conference · 2026.11.26–29 서강대학교 하비에르관</p>
+</main>
+<script>
+// 이 기기에 작성 중인 설문이 남아 있으면 버튼 문구를 바꾼다. (설문 쪽 저장 키와 같다)
+try {
+  var d = JSON.parse(localStorage.getItem('nar-survey-draft-v1'));
+  if (d && d.phase === 'survey' && Date.now() - d.savedAt < 2 * 60 * 60 * 1000) {
+    document.getElementById('toSurvey').textContent = '설문 이어서 하기';
+  }
+} catch (e) {}
+</script>
+</body>
+</html>
