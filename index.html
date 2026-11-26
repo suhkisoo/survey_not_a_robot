@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#f6f6f4">
+<title>〈로봇이 아닙니다*〉 관람 설문</title>
+<script>
+/* ============================================================
+   CONFIG — 팀이 정할 값은 전부 여기서 바꾼다 (명세 10장)
+   ============================================================ */
+const CONFIG = {
+  // Apps Script 웹 앱 배포 후 나오는 /exec 주소 (README 참고)
+  ENDPOINT: '',
+  // 문항을 고칠 때마다 올린다
+  FORM_VERSION: 'web-v1',
+
+  // [팀 확인 1] "직접 해 봄"의 구체적 행동 문구
+  TRIED_LABEL_B: '직접 해 봄',
+  TRIED_LABEL_C: '직접 해 봄',
+  // [팀 확인 2] "누군가처럼" 문항. 남길 것만 적는다: 'a_person', 'a_other'
+  A_QUOTED_ITEMS: ['a_person', 'a_other'],
+  // [팀 확인 3] 연구 주체와 소속. 비우면 "전시 〈로봇이 아닙니다*〉 팀"으로 표시
+  RESEARCHER: '',
+  // [팀 확인 5] 경품 내용. 비우면 "소정의 경품"으로 표시
+  PRIZE: '',
+  // [팀 확인 6] 연락처 보유 기간
+  RETENTION: '추첨과 인터뷰가 끝나면 바로 파기',
+  // [팀 확인 7] 5층 화면 속 존재들의 호칭
+  CROWD_NAME: '화면 속 군중',
+  // [팀 확인 8] 디자인 톤 (색)
+  THEME: { bg: '#f6f6f4', fog: '#e4e5e3', ink: '#1c1d1f', sub: '#62656a', line: '#d3d5d6', accent: '#1c1d1f' },
+
+  CONTACT_EMAIL: 'atscg2026@gmail.com',
+  RETRY_DELAYS_MS: [2000, 5000, 10000],
+  TIMEOUT_MS: 20000,
+  // 작성 중 임시 저장을 이 시간이 지나면 버린다 (공용 기기 대비)
+  DRAFT_MAX_AGE_MS: 2 * 60 * 60 * 1000
+};
+</script>
+<style>
+:root{--bg:#f6f6f4;--fog:#e4e5e3;--ink:#1c1d1f;--sub:#62656a;--line:#d3d5d6;--accent:#1c1d1f;--err:#b3261e}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.6;word-break:keep-all;overflow-wrap:anywhere;min-height:100vh;
+  background-image:radial-gradient(120% 60% at 15% 0%,#fff 0%,transparent 60%),radial-gradient(90% 50% at 100% 30%,var(--fog) 0%,transparent 70%),radial-gradient(100% 50% at 0% 100%,var(--fog) 0%,transparent 70%);
+  background-attachment:fixed}
+main{max-width:560px;margin:0 auto;padding:16px 20px calc(40px + env(safe-area-inset-bottom))}
+.progress{display:flex;align-items:center;gap:10px;margin:4px 0 22px;color:var(--sub);font-size:13px;font-variant-numeric:tabular-nums}
+.track{flex:1;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar{height:100%;background:var(--accent);transition:width .25s}
+h1{font-size:23px;line-height:1.35;margin:18px 0 18px;letter-spacing:-.01em}
+h2{font-size:20px;line-height:1.4;margin:0 0 6px;letter-spacing:-.01em}
+h1:focus,h2:focus{outline:none}
+.desc{margin:0 0 22px;font-weight:600;color:var(--sub);font-size:15px}
+p{margin:0 0 12px}
+.notice{background:rgba(255,255,255,.75);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:18px 0;font-size:14px;color:#3b3d41}
+.notice h3{font-size:14px;margin:0 0 8px}
+.notice ul{margin:0;padding-left:18px}
+.notice li{margin-bottom:6px}
+a{color:inherit}
+fieldset,.q{border:0;padding:0;margin:0 0 28px;min-width:0}
+legend,.qlabel{display:block;padding:0;font-weight:600;margin-bottom:10px;width:100%}
+.help{display:block;font-weight:400;color:var(--sub);font-size:14px;margin-top:2px}
+.opt{display:flex;align-items:flex-start;gap:11px;min-height:48px;padding:11px 14px;margin-bottom:8px;background:rgba(255,255,255,.8);border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.opt input{flex:none;width:20px;height:20px;margin:3px 0 0;accent-color:var(--accent)}
+.opt:has(input:checked){border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:#fff}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.opt small{display:block;color:var(--sub);font-size:13.5px}
+.scale{display:grid;grid-template-columns:repeat(7,1fr)}
+.scale label{position:relative;display:flex;justify-content:center;align-items:center;min-height:48px;cursor:pointer}
+.scale input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.scale span{width:40px;height:40px;border-radius:50%;border:1.5px solid #a9acaf;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--sub);transition:background .12s,color .12s}
+.scale input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.scale input:focus-visible+span{outline:2px solid var(--accent);outline-offset:3px}
+.ends{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-top:2px;padding:0 2px}
+input[type=text],textarea{width:100%;font:inherit;font-size:16px;color:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+textarea{min-height:92px;resize:vertical;display:block}
+input[type=text]:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.q.miss legend,.q.miss .qlabel{color:var(--err)}
+.q.miss.soft legend{color:inherit;text-decoration:underline dotted var(--sub);text-underline-offset:5px}
+.msg{min-height:1px;margin:0 0 12px;font-size:14.5px}
+.msg.warn{padding:12px 14px;border-radius:12px;background:#fff;border:1px solid var(--line)}
+.msg.err{padding:12px 14px;border-radius:12px;background:#fff;border:1px solid var(--err);color:var(--err)}
+.nav{display:flex;gap:10px;margin-top:8px}
+button{font:inherit;font-size:16px;font-weight:600;min-height:52px;padding:0 20px;border-radius:12px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;flex:1}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line);flex:0 0 auto}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.hp{position:absolute!important;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+.small{font-size:13.5px;color:var(--sub)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="hp" aria-hidden="true">
+  <label>이 칸은 비워 두세요 <input type="text" id="hp" name="website" tabindex="-1" autocomplete="off"></label>
+</div>
+<main id="app"><noscript>이 설문은 자바스크립트가 켜져 있어야 응답할 수 있습니다.</noscript></main>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------- 작은 도구들 ---------- */
+const KEY = 'nar-survey-draft-v1';
+const app = document.getElementById('app');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const k in (attrs || {})) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k.slice(0, 2) === 'on') el.addEventListener(k.slice(2), v);
+    else if (k === 'checked' || k === 'value' || k === 'disabled') el[k] = v;
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat(Infinity)) {
+    if (c == null || c === false) continue;
+    el.append(c.nodeType ? c : document.createTextNode(String(c)));
+  }
+  return el;
+}
+// 받침 유무에 맞는 조사 고르기. 한글이 아닌 글자(A, B)는 받침 없는 것으로 본다.
+function josa(word, withBatchim, without) {
+  const c = word.charCodeAt(word.length - 1);
+  const has = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+  return word + (has ? withBatchim : without);
+}
+function uuid() {
+  try { if (crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+  const b = new Uint8Array(16);
+  try { crypto.getRandomValues(b); } catch (e) { for (let i = 0; i < 16; i++) b[i] = Math.random() * 256 | 0; }
+  b[6] = b[6] & 0x0f | 0x40; b[8] = b[8] & 0x3f | 0x80;
+  const x = Array.from(b, n => n.toString(16).padStart(2, '0')).join('');
+  return x.slice(0, 8) + '-' + x.slice(8, 12) + '-' + x.slice(12, 16) + '-' + x.slice(16, 20) + '-' + x.slice(20);
+}
+
+/* ---------- 문항 정의 (명세 4장) ---------- */
+const CROWD = CONFIG.CROWD_NAME;
+const JUDGE = [
+  { v: 'human', t: '실제 사람', d: '안이나 뒤에 사람이 있다' },
+  { v: 'ai', t: 'AI', d: '스스로 반응하는 프로그램' },
+  { v: 'object', t: '마네킹·물체', d: '반응하지 않는 사물' },
+  { v: 'machine', t: '기계', d: '정해진 대로 움직이는 장치' },
+  { v: 'unsure', t: '모르겠다' }
+];
+const YESNO = [{ v: 'yes', t: '예' }, { v: 'no', t: '아니오' }];
+const seen = (a, p) => !!a[p + '_exp'] && a[p + '_exp'] !== 'none';
+const anySeen = a => seen(a, 'b') || seen(a, 'c') || seen(a, 'a');
+
+function expQ(p, name, tried, help) {
+  return { id: p + '_exp', type: 'single', required: true, label: josa(name, '을', '를') + ' 어떻게 경험하셨나요?', help: help,
+    opts: [{ v: 'none', t: '안 봄' }, { v: 'seen', t: '보기만 함' }, { v: 'tried', t: tried }] };
+}
+function scaleQs(p, name) {
+  const on = a => seen(a, p);
+  return [
+    { id: p + '_human', type: 'scale7', label: josa(name, '은', '는') + ' 사람 같았다', cond: on },
+    { id: p + '_feel', type: 'scale7', label: josa(name, '은', '는') + ' 무언가를 느끼는 것 같았다', cond: on },
+    { id: p + '_think', type: 'scale7', label: josa(name, '은', '는') + ' 스스로 생각하는 것 같았다', cond: on }
+  ];
+}
+function judgeQs(p, name) {
+  const on = a => seen(a, p);
+  return [
+    { id: p + '_what', type: 'single', label: '관람을 마친 지금, ' + josa(name, '은', '는') + ' 무엇이라고 생각하시나요?', opts: JUDGE, cond: on },
+    { id: p + '_changed', type: 'single', label: '관람하는 동안 ' + josa(name, '이', '가') + ' 무엇인지에 대한 생각이 바뀌었나요?', opts: YESNO, cond: on },
+    { id: p + '_first', type: 'single', label: '처음에는 무엇이라고 생각하셨나요?', opts: JUDGE, cond: a => a[p + '_changed'] === 'yes' }
+  ];
+}
+const quotedYes = a => a.a_quoted === 'yes';
+const A_QUOTED = [
+  { id: 'a_person', type: 'scale7', label: '그때 A가 하나의 인격을 가진 존재처럼 느껴졌다', cond: quotedYes },
+  { id: 'a_other', type: 'scale7', label: '그때 A가 그 말을 했던 다른 관객처럼 느껴졌다', cond: quotedYes }
+].filter(q => CONFIG.A_QUOTED_ITEMS.indexOf(q.id) !== -1);
+
+const STEPS = [
+  { id: 'b', title: 'B · 4층 복도의 존재', desc: '4층 복도, 의자 위의 존재와 그 앞의 작은 화면',
+    qs: [expQ('b', 'B', CONFIG.TRIED_LABEL_B)].concat(scaleQs('b', 'B'), judgeQs('b', 'B')) },
+  { id: 'c', title: CROWD + ' · 5층 화면 속 존재들', desc: '5층 벽면 화면 속, 흰 안개 속의 얼굴 없는 군중',
+    qs: [expQ('c', CROWD, CONFIG.TRIED_LABEL_C)].concat(scaleQs('c', CROWD), judgeQs('c', CROWD)) },
+  { id: 'a', title: 'A · 5층 상자 속 존재', desc: '5층의 흰 나무 상자. 외시경과 손 구멍이 있는 상자 속의 존재',
+    qs: [
+      expQ('a', 'A', '직접 해 봄', '말 걸기, 만지기, 노크 등'),
+      { id: 'a_did', type: 'multi', label: 'A와 무엇을 해 보셨나요?', help: '모두 선택', exclusive: 'na', cond: a => seen(a, 'a'),
+        opts: [{ v: 'talk', t: 'A와 대화함' }, { v: 'hand', t: '손 구멍으로 손을 만짐' }, { v: 'peep_door', t: '문 쪽 외시경으로 봄' },
+          { v: 'peep_side', t: '측면 외시경으로 봄' }, { v: 'knock', t: '노크함' }, { v: 'na', t: '해당 없음' }] }
+    ].concat(scaleQs('a', 'A'), judgeQs('a', 'A'), [
+      { id: 'a_reluct', type: 'scale7', label: 'A에게 함부로 말하거나 대하기가 꺼려졌다', cond: a => seen(a, 'a') },
+      { id: 'a_quoted', type: 'single', label: 'A가 다른 관객의 말이나 이름을 꺼낸 적이 있나요?', cond: a => seen(a, 'a'),
+        opts: [{ v: 'yes', t: '예' }, { v: 'no', t: '아니오' }, { v: 'unsure', t: '모르겠다' }] }
+    ], A_QUOTED) },
+  { id: 'reflect', title: '세 존재를 돌아보며', show: anySeen,
+    qs: [
+      { id: 'most_human', type: 'single', label: '가장 사람 같았던 존재는?', cond: anySeen,
+        opts: a => [{ v: 'b', t: 'B' }, { v: 'c', t: CROWD }, { v: 'a', t: 'A' }].filter(o => seen(a, o.v)).concat([{ v: 'none', t: '없음' }]) },
+      { id: 'most_reason', type: 'multi', label: '그렇게 느낀 이유는?', help: '모두 선택',
+        cond: a => ['b', 'c', 'a'].indexOf(a.most_human) !== -1,
+        opts: [{ v: 'body', t: '몸의 모양' }, { v: 'voice', t: '목소리' }, { v: 'words', t: '말의 내용이나 말투' }, { v: 'react', t: '내 움직임에 반응함' },
+          { v: 'talk', t: '대화가 통함' }, { v: 'memory', t: '나를 기억함' }, { v: 'touch', t: '손의 촉감' }, { v: 'other', t: '기타' }] },
+      { id: 'most_reason_other', type: 'text', label: '기타 이유를 적어 주세요', cond: a => (a.most_reason || []).indexOf('other') !== -1 },
+      { id: 'unsure_why', type: 'long', label: "앞에서 '모르겠다'를 고른 존재가 있다면, 무엇 때문에 판단이 어려웠나요?",
+        cond: a => a.b_what === 'unsure' || a.c_what === 'unsure' || a.a_what === 'unsure' },
+      { id: 'changed_moment', type: 'long', label: '생각이 바뀐 순간이 있었다면, 어떤 순간이었나요?',
+        cond: a => a.b_changed === 'yes' || a.c_changed === 'yes' || a.a_changed === 'yes' },
+      { id: 'why_human', type: 'long', label: '어떤 존재에게, 왜 사람다움을 느끼셨나요?', cond: anySeen }
+    ] },
+  { id: 'info', title: '기본 정보',
+    qs: [
+      { id: 'age', type: 'single', label: '연령대',
+        opts: [{ v: '10s', t: '10대' }, { v: '20s', t: '20대' }, { v: '30s', t: '30대' }, { v: '40s', t: '40대' }, { v: '50plus', t: '50대 이상' }, { v: 'na', t: '답하지 않음' }] },
+      { id: 'ai_use', type: 'single', label: 'AI 챗봇(ChatGPT 등)을 얼마나 자주 쓰시나요?',
+        opts: [{ v: 'daily', t: '거의 매일' }, { v: 'weekly', t: '주 몇 번' }, { v: 'monthly', t: '한 달에 몇 번' }, { v: 'rarely', t: '거의 안 씀' }, { v: 'never', t: '써 본 적 없음' }] }
+    ] }
+];
+const optsOf = (q, a) => typeof q.opts === 'function' ? q.opts(a) : q.opts;
+
+/* ---------- 상태와 임시 저장 ---------- */
+let state, warned, busy;
+function fresh() {
+  return { id: uuid(), startedAt: 0, savedAt: 0, phase: 'intro', stepId: 'b', consent: null, answers: {} };
+}
+function save() {
+  if (state.phase !== 'intro' && state.phase !== 'survey') return;
+  state.savedAt = Date.now();
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+}
+function clearDraft() { try { localStorage.removeItem(KEY); } catch (e) {} }
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && s.id && s.answers && typeof s.answers === 'object' && Date.now() - s.savedAt < CONFIG.DRAFT_MAX_AGE_MS &&
+        (s.phase === 'intro' || s.phase === 'survey') && STEPS.some(x => x.id === s.stepId)) return s;
+  } catch (e) {}
+  return null;
+}
+function reset() {
+  clearDraft();
+  state = fresh(); warned = new Set(); busy = false;
+  document.getElementById('hp').value = '';
+  render();
+}
+
+// 화면에서 숨겨진 문항의 값을 뺀 "유효한 답". 조건 판단과 전송 모두 이것을 쓴다.
+function effective() {
+  const src = state.answers, out = {};
+  for (const s of STEPS) {
+    if (s.show && !s.show(out)) continue;
+    for (const q of s.qs) {
+      if (q.cond && !q.cond(out)) continue;
+      let v = src[q.id];
+      if (q.opts) {
+        const allowed = optsOf(q, out).map(o => o.v);
+        if (Array.isArray(v)) v = v.filter(x => allowed.indexOf(x) !== -1);
+        else if (allowed.indexOf(v) === -1) v = undefined;
+      }
+      if (typeof v === 'string') v = v.trim();
+      if (v == null || v === '' || (Array.isArray(v) && !v.length)) continue;
+      out[q.id] = v;
+    }
+  }
+  return out;
+}
+const visibleSteps = E => STEPS.filter(s => !s.show || s.show(E));
+const curStep = () => STEPS.find(s => s.id === state.stepId);
+
+/* ---------- 문항 그리기 ---------- */
+function setAnswer(q, v) {
+  state.answers[q.id] = v;
+  save();
+  updateVisibility();
+}
+function renderQ(q, E) {
+  const cur = state.answers[q.id];
+  const helpEl = q.help ? h('span', { class: 'help' }, q.help) : null;
+  if (q.type === 'text' || q.type === 'long') {
+    const fid = 'f_' + q.id;
+    const field = q.type === 'long'
+      ? h('textarea', { id: fid, name: q.id, maxlength: 2000, rows: 3 })
+      : h('input', { id: fid, name: q.id, type: 'text', maxlength: 300, autocomplete: 'off' });
+    field.value = cur || '';
+    field.addEventListener('input', () => { state.answers[q.id] = field.value; save(); });
+    return h('div', { class: 'q', 'data-q': q.id }, h('label', { class: 'qlabel', for: fid }, q.label, helpEl), field);
+  }
+  let body;
+  if (q.type === 'scale7') {
+    body = [
+      h('div', { class: 'scale' }, [1, 2, 3, 4, 5, 6, 7].map(n =>
+        h('label', null,
+          h('input', { type: 'radio', name: q.id, value: String(n), checked: cur === n,
+            'aria-label': n + (n === 1 ? ' 전혀 아니다' : n === 7 ? ' 매우 그렇다' : ''), onchange: () => setAnswer(q, n) }),
+          h('span', { 'aria-hidden': 'true' }, n)))),
+      h('div', { class: 'ends', 'aria-hidden': 'true' }, h('span', null, '전혀 아니다'), h('span', null, '매우 그렇다'))
+    ];
+  } else {
+    const multi = q.type === 'multi';
+    const arr = Array.isArray(cur) ? cur : [];
+    body = optsOf(q, E).map(o => h('label', { class: 'opt' },
+      h('input', { type: multi ? 'checkbox' : 'radio', name: q.id, value: o.v, checked: multi ? arr.indexOf(o.v) !== -1 : cur === o.v,
+        onchange: ev => {
+          if (!multi) return setAnswer(q, o.v);
+          const boxes = Array.from(ev.target.closest('fieldset').querySelectorAll('input'));
+          if (q.exclusive && ev.target.checked) {
+            // "해당 없음"을 고르면 나머지 해제, 다른 것을 고르면 "해당 없음" 해제
+            boxes.forEach(b => { if ((o.v === q.exclusive) !== (b.value === q.exclusive)) b.checked = false; });
+          }
+          setAnswer(q, boxes.filter(b => b.checked).map(b => b.value));
+        } }),
+      h('span', null, o.t, o.d ? h('small', null, o.d) : null)));
+  }
+  return h('fieldset', { class: 'q', 'data-q': q.id }, h('legend', null, q.label, helpEl), body);
+}
+function updateVisibility() {
+  const E = effective(), step = curStep();
+  if (state.phase !== 'survey' || !step) return;
+  step.qs.forEach(q => {
+    const el = app.querySelector('[data-q="' + q.id + '"]');
+    if (el) el.hidden = !!(q.cond && !q.cond(E));
+  });
+}
+function showMsg(kind, ...lines) {
+  const m = document.getElementById('msg');
+  if (!m) return;
+  m.className = 'msg' + (kind ? ' ' + kind : '');
+  m.replaceChildren(...lines.filter(Boolean).map(t => h('div', null, t)));
+}
+function markMissing(ids, soft) {
+  app.querySelectorAll('.q').forEach(el => {
+    const on = ids.indexOf(el.getAttribute('data-q')) !== -1;
+    el.classList.toggle('miss', on);
+    el.classList.toggle('soft', on && !!soft);
+  });
+}
+function progress(i, total) {
+  return h('div', { class: 'progress', role: 'progressbar', 'aria-valuemin': 1, 'aria-valuemax': total, 'aria-valuenow': i, 'aria-label': '진행 ' + i + '/' + total },
+    h('div', { class: 'track' }, h('div', { class: 'bar', style: 'width:' + Math.round(i / total * 100) + '%' })),
+    h('span', null, i + ' / ' + total));
+}
+function mount(nodes, focusHeading) {
+  app.replaceChildren(...nodes.flat().filter(Boolean));
+  window.scrollTo(0, 0);
+  if (focusHeading) { const hd = app.querySelector('h1,h2'); if (hd) { hd.setAttribute('tabindex', '-1'); hd.focus({ preventScroll: true }); } }
+}
+
+/* ---------- 화면들 ---------- */
+function render(focus) {
+  if (state.phase === 'intro') return renderIntro(focus);
+  if (state.phase === 'declined') return renderDeclined();
+  if (state.phase === 'done') return renderDone();
+  renderStep(focus);
+}
+
+function renderIntro(focus) {
+  const who = CONFIG.RESEARCHER || '전시 〈로봇이 아닙니다*〉 팀';
+  const prize = CONFIG.PRIZE || '소정의 경품';
+  const total = 1 + visibleSteps(effective()).length;
+  const radio = (v, t) => h('label', { class: 'opt' },
+    h('input', { type: 'radio', name: 'consent', value: v, checked: state.consent === v, onchange: () => { state.consent = v; save(); } }), h('span', null, t));
+  mount([
+    progress(1, total),
+    h('h1', null, '〈로봇이 아닙니다*〉 관람 설문'),
+    h('p', null, '전시 〈로봇이 아닙니다*〉를 관람해 주셔서 감사합니다.'),
+    h('p', null, '세 존재(4층 복도의 B, 5층 ' + CROWD + ', 5층 상자 속 A)를 만나며 어떤 생각이 드셨는지 묻는 짧은 설문입니다. 약 3분 걸립니다.'),
+    h('p', null, '응답해 주신 분 가운데 추첨으로 ' + josa(prize, '을', '를') + ' 드립니다.'),
+    h('div', { class: 'notice' },
+      h('h3', null, '연구 참여 안내'),
+      h('ul', null,
+        h('li', null, '이 설문은 ' + josa(who, '이', '가') + ' 전시 관람 경험을 연구하기 위해 진행합니다.'),
+        h('li', null, '응답은 익명으로 수집됩니다. 경품 추첨이나 인터뷰를 위해 연락처를 남기시는 경우에도, 연락처는 설문 응답과 연결되지 않도록 따로 저장됩니다.'),
+        h('li', null, '익명 처리된 응답은 국내외 학술대회 발표 및 논문에 사용될 수 있습니다.'),
+        h('li', null, '관람 여부를 묻는 문항 외에는 원하지 않는 문항을 건너뛸 수 있고, 언제든 응답을 그만둘 수 있습니다. 제출 전에 그만두시면 아무것도 저장되지 않습니다.'),
+        h('li', null, '익명 응답이라 제출한 뒤에는 개별 응답을 찾아 삭제해 드리기 어렵습니다.'),
+        h('li', null, '문의: ', h('a', { href: 'mailto:' + CONFIG.CONTACT_EMAIL }, CONFIG.CONTACT_EMAIL)))),
+    h('fieldset', { class: 'q', 'data-q': 'consent' },
+      h('legend', null, '위 내용을 읽고 설문에 참여하는 데 동의하십니까?'),
+      radio('yes', '예, 동의합니다'), radio('no', '아니오')),
+    h('div', { id: 'msg', class: 'msg', role: 'status', 'aria-live': 'polite' }),
+    h('div', { class: 'nav' }, h('button', { type: 'button', id: 'next', onclick: () => {
+      if (!state.consent) { markMissing(['consent']); return showMsg('err', '참여에 동의하시는지 선택해 주세요.'); }
+      if (state.consent === 'no') { clearDraft(); state = fresh(); state.phase = 'declined'; return render(true); }
+      if (!state.startedAt) state.startedAt = Date.now();
+      state.phase = 'survey'; warned = new Set(); save(); render(true);
+    } }, '시작하기'))
+  ], focus);
+}
+
+function renderDeclined() {
+  mount([
+    h('h1', null, '감사합니다'),
+    h('p', null, '전시 〈로봇이 아닙니다*〉를 관람해 주셔서 감사합니다. 설문에 참여하지 않으셨고, 아무것도 저장되지 않았습니다.'),
+    h('div', { class: 'nav' }, h('button', { type: 'button', class: 'ghost', onclick: reset }, '처음으로'))
+  ], true);
+}
+
+function renderStep(focus) {
+  const E = effective(), steps = visibleSteps(E);
+  let step = curStep();
+  if (steps.indexOf(step) === -1) { step = steps[0]; state.stepId = step.id; }
+  const i = steps.indexOf(step), last = i === steps.length - 1;
+  mount([
+    progress(i + 2, steps.length + 1),
+    h('h2', null, step.title),
+    step.desc ? h('p', { class: 'desc' }, step.desc) : h('p', { class: 'desc' }),
+    step.qs.map(q => renderQ(q, E)),
+    h('div', { id: 'msg', class: 'msg', role: 'status', 'aria-live': 'polite' }),
+    h('div', { class: 'nav' },
+      h('button', { type: 'button', class: 'ghost', id: 'prev', onclick: onPrev }, '이전'),
+      h('button', { type: 'button', id: 'next', onclick: onNext }, last ? '제출' : '다음'))
+  ], focus);
+  updateVisibility();
+}
+
+function onPrev() {
+  if (busy) return;
+  const steps = visibleSteps(effective()), i = steps.indexOf(curStep());
+  warned = new Set();
+  if (i <= 0) state.phase = 'intro'; else state.stepId = steps[i - 1].id;
+  save(); render(true);
+}
+
+function onNext() {
+  if (busy) return;
+  const E = effective(), step = curStep();
+  const vis = step.qs.filter(q => !q.cond || q.cond(E));
+  const missReq = vis.filter(q => q.required && E[q.id] == null).map(q => q.id);
+  if (missReq.length) {
+    markMissing(missReq);
+    showMsg('err', '이 문항은 꼭 답해 주세요.');
+    app.querySelector('[data-q="' + missReq[0] + '"]').scrollIntoView({ block: 'center' });
+    return;
+  }
+  // 주관식은 비워도 묻지 않는다. 선택형·척도만 한 번 확인한다.
+  const missOpt = vis.filter(q => !q.required && q.type !== 'text' && q.type !== 'long' && E[q.id] == null).map(q => q.id);
+  const last = visibleSteps(E).slice(-1)[0] === step;
+  if (missOpt.some(id => !warned.has(id))) {
+    missOpt.forEach(id => warned.add(id));
+    markMissing(missOpt, true);
+    showMsg('warn', '답하지 않은 문항이 있어요. 그대로 넘어갈까요?', "'" + (last ? '제출' : '다음') + "'을 한 번 더 누르면 넘어갑니다.");
+    return;
+  }
+  if (last) return submit();
+  const steps = visibleSteps(E);
+  state.stepId = steps[steps.indexOf(step) + 1].id;
+  warned = new Set(); save(); render(true);
+}
+
+/* ---------- 전송 (명세 2장 전송 규칙) ---------- */
+async function post(payload) {
+  if (!CONFIG.ENDPOINT) throw new Error('no_endpoint');
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), CONFIG.TIMEOUT_MS);
+  try {
+    const res = await fetch(CONFIG.ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload), signal: ctrl.signal });
+    const data = JSON.parse(await res.text());
+    if (!data || data.ok !== true) throw new Error('not_ok');
+  } finally { clearTimeout(timer); }
+}
+async function sendWithRetry(payload, onRetry) {
+  const delays = CONFIG.RETRY_DELAYS_MS;
+  for (let i = 0; ; i++) {
+    try { await post(payload); return true; }
+    catch (e) {
+      if (i >= delays.length) return false;
+      onRetry(i + 1, delays.length);
+      await sleep(delays[i]);
+    }
+  }
+}
+function setBusy(on, ids) {
+  busy = on;
+  ids.forEach(id => { const b = document.getElementById(id); if (b) b.disabled = on; });
+}
+
+async function submit() {
+  if (busy) return;
+  setBusy(true, ['next', 'prev']);
+  showMsg('warn', '응답을 보내는 중입니다…');
+  const answers = effective();
+  answers.duration_sec = Math.max(0, Math.round((Date.now() - (state.startedAt || Date.now())) / 1000));
+  const payload = { kind: 'response', response_id: state.id, form_version: CONFIG.FORM_VERSION,
+    hp: document.getElementById('hp').value, answers: answers };
+  const ok = await sendWithRetry(payload, (n, total) =>
+    showMsg('warn', '연결이 불안정해요. 다시 보내는 중입니다… (' + n + '/' + total + ')'));
+  if (ok) {
+    clearDraft();
+    state = fresh(); state.phase = 'done'; busy = false;
+    return render(true);
+  }
+  setBusy(false, ['next', 'prev']);
+  const btn = document.getElementById('next');
+  if (btn) btn.textContent = '다시 보내기';
+  showMsg('err', '응답을 보내지 못했어요. 답안은 그대로 남아 있습니다.', '인터넷 연결을 확인한 뒤 \'다시 보내기\'를 눌러 주세요.');
+}
+
+/* ---------- 완료 화면과 연락처 (명세 4.8) ---------- */
+function renderDone() {
+  const raffle = h('input', { type: 'checkbox', id: 'raffle' });
+  const interview = h('input', { type: 'checkbox', id: 'interview' });
+  const contact = h('input', { type: 'text', id: 'contact', maxlength: 200, autocomplete: 'off', inputmode: 'email', placeholder: '010-0000-0000 또는 이메일' });
+  const agree = h('input', { type: 'checkbox', id: 'agree' });
+  const sendBtn = h('button', { type: 'button', id: 'sendContact', disabled: true }, '연락처 보내기');
+  const sync = () => { sendBtn.disabled = busy || !((raffle.checked || interview.checked) && contact.value.trim() && agree.checked); };
+  [raffle, interview, agree].forEach(el => el.addEventListener('change', sync));
+  contact.addEventListener('input', sync);
+
+  sendBtn.addEventListener('click', async () => {
+    if (busy || sendBtn.disabled) return;
+    busy = true; sync();
+    showMsg('warn', '연락처를 보내는 중입니다…');
+    // response_id를 넣지 않는다: 응답과 연결되지 않게 하기 위함
+    const payload = { kind: 'contact', hp: document.getElementById('hp').value, contact: contact.value.trim(),
+      raffle: raffle.checked, interview: interview.checked };
+    const ok = await sendWithRetry(payload, (n, total) =>
+      showMsg('warn', '연결이 불안정해요. 다시 보내는 중입니다… (' + n + '/' + total + ')'));
+    busy = false;
+    if (ok) {
+      form.replaceChildren(h('p', { id: 'contactDone' }, '연락처가 접수되었습니다. 감사합니다.'));
+    } else {
+      sync(); sendBtn.textContent = '다시 보내기';
+      showMsg('err', '연락처를 보내지 못했어요. 인터넷 연결을 확인한 뒤 \'다시 보내기\'를 눌러 주세요.');
+    }
+  });
+
+  const form = h('div', { id: 'contactForm' },
+    h('p', null, '경품 추첨에 응모하시거나 추후 인터뷰에 참여해 주실 수 있다면 연락처를 남겨 주세요. 연락처는 방금 제출한 응답과 연결되지 않습니다.'),
+    h('p', { class: 'small' }, '남기지 않고 이 화면을 닫으셔도 됩니다.'),
+    h('fieldset', { class: 'q' }, h('legend', null, '참여 항목', h('span', { class: 'help' }, '하나 이상 선택')),
+      h('label', { class: 'opt' }, raffle, h('span', null, '경품 추첨에 응모합니다')),
+      h('label', { class: 'opt' }, interview, h('span', null, '추후 인터뷰에 참여할 수 있습니다'))),
+    h('div', { class: 'q' }, h('label', { class: 'qlabel', for: 'contact' }, '전화번호 또는 이메일'), contact),
+    h('div', { class: 'q' },
+      h('label', { class: 'opt' }, agree, h('span', null, '개인정보 수집·이용에 동의합니다',
+        h('small', null, '수집 항목: 연락처. 목적: 경품 추첨 안내, 인터뷰 연락. 보유 기간: ' + CONFIG.RETENTION + '. 동의하지 않으셔도 되며, 그 경우 추첨과 인터뷰 연락을 받으실 수 없습니다.')))),
+    h('div', { id: 'msg', class: 'msg', role: 'status', 'aria-live': 'polite' }),
+    h('div', { class: 'nav' }, sendBtn));
+
+  mount([
+    h('h1', null, '응답이 제출되었습니다. 감사합니다.'),
+    form,
+    h('hr'),
+    h('div', { class: 'nav' }, h('button', { type: 'button', class: 'ghost', id: 'restart', onclick: () => { if (!busy) reset(); } }, '새 응답 시작'))
+  ], true);
+}
+
+/* ---------- 시작 ---------- */
+const T = CONFIG.THEME || {};
+for (const k in T) document.documentElement.style.setProperty('--' + k, T[k]);
+state = load() || fresh();
+warned = new Set(); busy = false;
+render();
+})();
+</script>
+</body>
+</html>
