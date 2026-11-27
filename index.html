@@ -14,7 +14,7 @@ const CONFIG = {
   // Apps Script 웹 앱 배포 후 나오는 /exec 주소 (README 참고)
   ENDPOINT: 'https://script.google.com/macros/s/AKfycbws_NuP50CLsUwBAFqqRTbrLnY7k7BlBQl5XKYa6DySQa_6o0E4A0qnErko-aYqIONj/exec',
   // 문항을 고칠 때마다 올린다
-  FORM_VERSION: 'web-v3',   // v1: 외시경 문 쪽/측면(peep_door, peep_side) · v2: 오른쪽/왼쪽(peep_right, peep_left) · v3: 하나로 합침(peep)
+  FORM_VERSION: 'web-v4',   // v4: 성별(gender) 추가 · v1: 외시경 문 쪽/측면(peep_door, peep_side) · v2: 오른쪽/왼쪽(peep_right, peep_left) · v3: 하나로 합침(peep)
 
   // [팀 확인 1] "직접 해 봄"의 구체적 행동 문구
   TRIED_LABEL_B: '직접 해 봄',
@@ -253,6 +253,8 @@ const STEPS = [
     qs: [
       { id: 'age', type: 'single', label: '연령대',
         opts: [{ v: '10s', t: '10대' }, { v: '20s', t: '20대' }, { v: '30s', t: '30대' }, { v: '40s', t: '40대' }, { v: '50plus', t: '50대 이상' }, { v: 'na', t: '답하지 않음' }] },
+      { id: 'gender', type: 'single', label: '성별',
+        opts: [{ v: 'female', t: '여성' }, { v: 'male', t: '남성' }, { v: 'other', t: '기타' }, { v: 'na', t: '답하지 않음' }] },
       { id: 'ai_use', type: 'single', label: 'AI 챗봇(ChatGPT 등)을 얼마나 자주 쓰시나요?',
         opts: [{ v: 'daily', t: '거의 매일' }, { v: 'weekly', t: '주 몇 번' }, { v: 'monthly', t: '한 달에 몇 번' }, { v: 'rarely', t: '거의 안 씀' }, { v: 'never', t: '써 본 적 없음' }] }
     ] }

@@ -12,7 +12,8 @@ const RESP_COLS = [
   'a_reluct', 'a_quoted', 'a_person', 'a_other',
   'most_human', 'most_reason', 'most_reason_other',
   'unsure_why', 'changed_moment', 'why_human',
-  'age', 'ai_use'
+  'age', 'ai_use',
+  'gender'          // web-v4에서 추가. 기존 행과 열이 어긋나지 않도록 맨 뒤에 둔다
 ];
 const CONTACT_COLS = ['date', 'contact', 'raffle', 'interview'];
 

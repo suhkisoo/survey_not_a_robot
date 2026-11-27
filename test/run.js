@@ -104,11 +104,12 @@ function resetSheets() { sheets.responses = new Sheet(); sheets.contacts = new S
     ok(!(await vis(page, 'b_human')), '경험 답 전에는 B 문항 숨김');
     for (const p of ['b', 'c', 'a']) { await pick(page, p + '_exp', 'none'); await next(page); }
     ok(await title(page) === '기본 정보', '4.5를 건너뛰고 기본 정보로');
-    await pick(page, 'age', '20s'); await pick(page, 'ai_use', 'daily'); await next(page);
+    await pick(page, 'age', '20s'); await pick(page, 'ai_use', 'daily'); await pick(page, 'gender', 'female'); await next(page);
     await page.waitForSelector('#contactForm');
     const r = respRows();
     ok(r.length === 1 && r[0][COLS.indexOf('b_exp')] === 'none' && r[0][COLS.indexOf('age')] === '20s', '전송 정상 (1행)');
-    ok(r[0][COLS.indexOf('form_version')] === 'web-v3' && typeof r[0][COLS.indexOf('duration_sec')] === 'number', 'form_version, duration_sec 기록');
+    ok(r[0][COLS.indexOf('gender')] === 'female' && COLS[COLS.length - 1] === 'gender', '성별 저장 (맨 뒤 열)');
+    ok(r[0][COLS.indexOf('form_version')] === 'web-v4' && typeof r[0][COLS.indexOf('duration_sec')] === 'number', 'form_version, duration_sec 기록');
     ok(posts[0].type.startsWith('text/plain'), 'Content-Type text/plain');
     ok(await page.evaluate(() => localStorage.length) === 0, '전송 성공 후 임시 저장 삭제');
     await context.close(); }
@@ -187,7 +188,7 @@ function resetSheets() { sheets.responses = new Sheet(); sheets.contacts = new S
   console.log('8. 제출 연타 / 새로고침 후 재전송');
   { resetSheets(); const { context, page } = await open();
     await allNoneToInfo(page);
-    await pick(page, 'age', '30s'); await pick(page, 'ai_use', 'weekly');
+    await pick(page, 'age', '30s'); await pick(page, 'ai_use', 'weekly'); await pick(page, 'gender', 'male');
     await page.evaluate(() => { const b = document.getElementById('next'); b.click(); b.click(); b.click(); });
     await page.waitForSelector('#contactForm');
     ok(respRows().length === 1 && posts.length === 1, '연타해도 한 번만 전송, 1행');
@@ -195,7 +196,7 @@ function resetSheets() { sheets.responses = new Sheet(); sheets.contacts = new S
 
     resetSheets(); const o = await open(); const p2 = o.page;
     await allNoneToInfo(p2);
-    await pick(p2, 'age', '40s'); await pick(p2, 'ai_use', 'never');
+    await pick(p2, 'age', '40s'); await pick(p2, 'ai_use', 'never'); await pick(p2, 'gender', 'na');
     // 서버에는 저장됐지만 응답이 끊긴 상황
     await p2.route('**/exec', async route => { await route.fetch(); await route.abort(); });
     await next(p2);
@@ -213,7 +214,7 @@ function resetSheets() { sheets.responses = new Sheet(); sheets.contacts = new S
   console.log('9. 네트워크 끊고 제출');
   { resetSheets(); const { context, page } = await open();
     await allNoneToInfo(page);
-    await pick(page, 'age', '10s'); await pick(page, 'ai_use', 'rarely');
+    await pick(page, 'age', '10s'); await pick(page, 'ai_use', 'rarely'); await pick(page, 'gender', 'other');
     await context.setOffline(true);
     const t0 = Date.now();
     await next(page);
